@@ -131,3 +131,63 @@ export const logoutUser = async (req, res) => {
     });
   }
 };
+ 
+export const getProfile = async(req,res)=>{
+  try {
+    const user = req.user;
+    const userId = req.user.id;
+    if(!userId){
+      return res.status(400).json({message:"User id is not found"});
+    }
+    const userData = await User.findById(userId).select("-password -refreshToken");
+
+    if(!userData){
+      return res.status(400).json({message:"User not found"});
+    }
+    console.log("UserData :", userData);
+   
+    return res.status(201).json({
+      message: "Profile fetched successfully",
+      responseData: userData,
+    });
+
+    
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error:error,
+      message:"Internal server error"});
+  }
+}
+
+export const  updateProfile = async (req,res)=>{
+  try {
+  const {fullName,email,phoneNumber} = req.body;
+  if(!fullName || !email || !phoneNumber){
+    return res.status(400).json({message:"All fields are required"});
+  }
+    const userId = req.user.id;
+    if(!userId){
+      return res.status(400).json({message:"User id is not found"});
+    }
+    const userData = await User.findByIdAndUpdate({_id:userId},
+      {
+        fullName,
+        email,
+        phoneNumber
+      },
+      {new:true}
+    );
+    if(!userData){
+      return res.status(400).json({message:"User not found"});
+    }
+    return res.status(201).json({
+      message: "Profile updated successfully",
+      responseData: userData,
+    });
+  } catch (error) {
+    return res.status(500).json({message:"Internal server error"});
+    console.log(error);
+  }
+};
+
