@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import {connectDB} from "./utils/dbConnection.js";
+import userRouter from "./routes/user.route.js"
+
+
 dotenv.config(
     {
         path: "./.env"
@@ -10,11 +13,12 @@ dotenv.config(
 );
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 connectDB();
 
 //Middlewares-->
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors(
     {
@@ -24,8 +28,9 @@ app.use(cors(
 ));
 
 //Routes-->
+app.use("/api/v1/users",userRouter);
 
-const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 }); 

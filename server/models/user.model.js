@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const userSchema = new Schema(
@@ -31,14 +31,18 @@ const userSchema = new Schema(
       enum: ["user", "driver", "admin"],
       default: "user",
     },
-    location: {
-      lat: {
-        type: Number,
-      },
-      lng: {
-        type: Number,
-      },
-    },
+    // refreshToken:{
+    //   type:String,
+    
+    // },
+    // location: {
+    //   lat: {
+    //     type: Number,
+    //   },
+    //   lng: {
+    //     type: Number,
+    //   },
+    // },
   },
   {
     timestamps: true,
@@ -52,8 +56,8 @@ userSchema.pre("save", function (next) {
   next();
 });
 
-mongoose.methods.generateAccessToken = function () {
-  return jwt.sign({
+userSchema.methods.generateAccessToken = async function () {
+  return await jwt.sign({
     id: this._id,
     role: this.role,
     fullName: this.fullName,
@@ -62,8 +66,8 @@ mongoose.methods.generateAccessToken = function () {
   }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
 };
 
-mongoose.methods.generateRefreshToken = function () {
-  return jwt.sign({
+userSchema.methods.generateRefreshToken = async function () {
+  return await  jwt.sign({
     id: this._id,
     role: this.role,
    
