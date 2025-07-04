@@ -14,9 +14,9 @@ const generateAccessandRefreshTokens = async (user) => {
 
 export const registerUser = async (req, res) => {
   try {
-    const { fullName, email, password, phoneNumber,role  } = req.body;
+    const { fullName, email, password, phoneNumber, role } = req.body;
 
-    if (!fullName || !email || !password || !phoneNumber ||!role ) {
+    if (!fullName || !email || !password || !phoneNumber || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
     const existingUser = await User.findOne({ email });
@@ -29,9 +29,9 @@ export const registerUser = async (req, res) => {
       email,
       password,
       phoneNumber,
-    role
+      role,
     });
-    const {  accessToken,refreshToken} = await generateAccessandRefreshTokens(
+    const { accessToken, refreshToken } = await generateAccessandRefreshTokens(
       newUser
     );
     newUser.refreshToken = refreshToken;
@@ -39,12 +39,14 @@ export const registerUser = async (req, res) => {
     const createdUser = await User.findById(newUser._id).select(
       "-password -refreshToken"
     );
-  const options={
+    const options = {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-    }
-    res.cookie("accessToken",accessToken,options).cookie("refreshToken", refreshToken)
+    };
+    res
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken);
     console.log("token:", req.cookies);
     console.log("user:", createdUser);
     return res.status(201).json({
@@ -54,9 +56,9 @@ export const registerUser = async (req, res) => {
       message: "User registered successfully",
     });
   } catch (error) {
-    return res.status(500).json({ error:error ,
-        message:"internal server error",
-    });
+    return res
+      .status(500)
+      .json({ error: error, message: "internal server error" });
   }
 };
 
@@ -80,13 +82,17 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const { refreshToken, accessToken } = generateAccessandRefreshTokens(user);
-    const options={
+    const { accessToken, refreshToken } = await generateAccessandRefreshTokens(
+      user
+    );
+    const options = {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-    }
-   res.cookie("accessToken",accessToken,options).cookie("refreshToken", refreshToken)
+    };
+    res
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken);
 
     console.log("token:", req.cookies);
     console.log("user:", user);
@@ -102,17 +108,22 @@ export const loginUser = async (req, res) => {
   }
 };
 
-export const logoutUser = async () => {
+export const logoutUser = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const user = req.user;
 
-    const user = await User.findByIdAndUpdate(
-      { id: userId },
-      { $set: { refreshToken: "" } }
-    );
-    req.clearCookies(refreshToken);
-    return res.status(201).json({
-      message: "user logged out successfully",
+    if (!user) {
+      return next(new errorHandler("User not found", 404));
+    }
+
+    user.refreshToken = "";
+    await User.updateOne({ _id: user._id }, { refreshToken: "" });
+
+    res.clearCookie("refreshToken", { httpOnly: true, sameSite: "None" });
+
+    res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
     });
   } catch (error) {
     return res.status(400).json({
