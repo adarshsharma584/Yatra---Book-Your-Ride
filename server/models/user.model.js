@@ -31,9 +31,9 @@ const userSchema = new Schema(
       enum: ["user", "driver", "admin"],
       default: "user",
     },
-    // refreshToken:{
-    //   type:String,
-    
+    refreshToken:{
+      type:String,
+    },
     // },
     // location: {
     //   lat: {

@@ -19,29 +19,33 @@ const driverSchema = new Schema(
       unique: true
     }
   },
+  city:{
+    type:String,
+    required:true
+  },
   isAvailable: {
     type: Boolean,
     default: true
-  },
-  currentLocation: {
-    lat: { type: Number },
-    lng: { type: Number }
-  },
-  rating: {
-    type: Number,
-    default: 5,
-    min: 0,
-    max: 5
-  },
-  ridesCompleted: {
-    type: Number,
-    default: 0
   },
   licenseNumber: {
     type: String,
     required: true,
     unique: true
   }
+  // currentLocation: {
+  //   lat: { type: Number },
+  //   lng: { type: Number }
+  // },
+  // rating: {
+  //   type: Number,
+  //   default: 5,
+  //   min: 0,
+  //   max: 5
+  // },
+  // ridesCompleted: {
+  //   type: Number,
+  //   default: 0
+  // },
 },
 {
     timestamps:true
